@@ -4,7 +4,7 @@ const product=require("./models/product")
 const mongoose=require("mongoose")
 require("dotenv").config()
 const bodyparser = require('body-parser')
-const PORT=process.env.PORT || 3000
+const port=process.env.PORT || 3000
 
 const products_routs=require("./routes/products")
 
@@ -43,8 +43,8 @@ app.use("/api/products",products_routs)
 const start= async()=>{
     try{
         await connectDb(process.env.MONGODB_URL)
-         app.listen(PORT,()=>{
-            console.log(`Server is running on port ${PORT}`);
+         app.listen(port,()=>{
+            console.log(`Server is running on port ${port}`);
          })
     }
     catch(error){
