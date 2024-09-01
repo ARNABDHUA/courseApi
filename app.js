@@ -4,7 +4,7 @@ const product=require("./models/product")
 const mongoose=require("mongoose")
 require("dotenv").config()
 const bodyparser = require('body-parser')
-const PORT=process.env.PORT || 18013
+const PORT=process.env.PORT || 3000
 
 const products_routs=require("./routes/products")
 
