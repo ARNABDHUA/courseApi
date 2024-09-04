@@ -112,7 +112,7 @@ const generateRegisterNumber = async (joiningYear, streamCodes) => {
 // Ensure you have this endpoint in your Express server
 app.get('/api/teachers', async (req, res) => {
   try {
-    const teachers = await Teacher.find({});
+    const teachers = await Teacher.find(req.query);
     res.status(200).json({ teachers });
   } catch (error) {
     console.error("Error fetching teachers:", error);
@@ -289,7 +289,7 @@ const Student = mongoose.model("Student", studentSchema);
 // Ensure you have this endpoint in your Express server
 app.get('/api/students', async (req, res) => {
   try {
-    const students = await Student.find({});
+    const students = await Student.find(req.query);
     res.status(200).json({ students });
   } catch (error) {
     console.error("Error fetching teachers:", error);
