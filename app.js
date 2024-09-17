@@ -403,7 +403,7 @@ app.get('/api/courseexam', async (req, res) => {
     const Courseexam = await CourseExam.find(req.query);
     res.status(200).json({ Courseexam });
   } catch (error) {
-    console.error("Error fetching courseexam:", error);
+    console.error("Error fetching courseexam check the data", error);
     res.status(500).json({ message: "Error fetching courseexam data" });
   }
 });
