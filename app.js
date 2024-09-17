@@ -382,6 +382,7 @@ app.delete("/api/student/:email", async (req, res) => {
 // Student schema and model
 const courseExamSchema = new mongoose.Schema({
   sub :String,
+  teacher:String,
   paper:String,
   question: String,
   option1:String,
@@ -408,12 +409,13 @@ app.get('/api/courseexam', async (req, res) => {
 });
 
 app.post("/api/courseexam-student", async (req, res) => {
-  const { sub, paper, question, option1,option2,option3,option4,ans,examnumber } = req.body;
+  const { sub,teacher, paper, question, option1,option2,option3,option4,ans,examnumber } = req.body;
 
   try {
 
     const newCourseExam = new CourseExam({
       sub,
+      teacher,
       paper,
       question,
       option1,
