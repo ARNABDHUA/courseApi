@@ -262,7 +262,7 @@ app.delete("/api/teacher/:registerNumber", async (req, res) => {
   }
 });
 
-// Teacher schema and model
+// Student schema and model
 const studentSchema = new mongoose.Schema({
   name: String,
   email: String,
@@ -345,7 +345,7 @@ app.post('/api/signin-student', async (req, res) => {
   }
 });
 
-// Endpoint to edit a teacher
+// Endpoint to edit a student
 app.put("/api/student/:email", async (req, res) => {
   const { email } = req.params;
   const updatedData = req.body;
@@ -362,6 +362,105 @@ app.put("/api/student/:email", async (req, res) => {
   }
 });
 
+// Endpoint to delete a student
+app.delete("/api/student/:email", async (req, res) => {
+  const { email } = req.params;
+
+  try {
+    const student = await Student.findOneAndDelete({ email });
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+    res.status(200).json({ message: "Student deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error deleting Student" });
+  }
+});
+
+
+// Student schema and model
+const courseExamSchema = new mongoose.Schema({
+  sub :String,
+  paper:String,
+  question: String,
+  option1:String,
+  option2:String,
+  option3:String,
+  option4:String,
+  ans:Number,
+  examnumber:String,
+  status:{ type: Boolean, default: false },
+ // Changed to Boolean
+});
+
+const CourseExam = mongoose.model("Courseexam", courseExamSchema);
+
+// Ensure you have this endpoint in your Express server
+app.get('/api/courseexam', async (req, res) => {
+  try {
+    const Courseexam = await CourseExam.find(req.query);
+    res.status(200).json({ Courseexam });
+  } catch (error) {
+    console.error("Error fetching courseexam:", error);
+    res.status(500).json({ message: "Error fetching courseexam data" });
+  }
+});
+
+app.post("/api/courseexam-student", async (req, res) => {
+  const { sub, paper, question, option1,option2,option3,option4,ans,examnumber } = req.body;
+
+  try {
+
+    const newCourseExam = new CourseExam({
+      sub,
+      paper,
+      question,
+      option1,
+      option2,
+      option3,
+      option4,
+      ans,
+      examnumber
+      
+    });
+
+    await newCourseExam.save();
+    res
+      .status(201)
+      .json({ message: "Add the course Exam Question" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error course Exam" });
+  }
+});
+
+// Endpoint to edit a courseexam
+app.put("/api/courseexam/:id", async (req, res) => {
+  // const { _id } = req.params;
+  const updatedData = req.body;
+
+  try {
+    const couseexam = await CourseExam.findOneAndUpdate({_id: new mongoose.mongo.ObjectId(req.params.id)}, updatedData,{ new: true });
+    if (!couseexam) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+    res.status(200).json({ message: "updated successfully", couseexam });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error updating exam" });
+  }
+});
+
+app.delete("/api/courseexam/:id",async(req,res)=>{
+  try
+  {await connectDb(process.env.MONGODB_URL)
+  let show=await CourseExam.deleteOne({_id: new mongoose.mongo.ObjectId(req.params.id)})
+  res.send(show)}
+ catch(error){
+  console.log(error)
+ }
+})
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
