@@ -466,6 +466,63 @@ app.delete("/api/courseexam/:id",async(req,res)=>{
  }
 })
 
+const attendance = new mongoose.Schema({
+  sub :String,
+  teacher:String,
+  paper:String,
+  date:String,
+  student:String,
+
+ // Changed to Boolean
+});
+
+const Atten = mongoose.model("Attendance", attendance);
+
+// Ensure you have this endpoint in your Express server
+app.get('/api/atten', async (req, res) => {
+  try {
+    const attend = await Atten.find(req.query);
+    res.status(200).json({ attend });
+  } catch (error) {
+    console.error("Error fetching attendence check the data", error);
+    res.status(500).json({ message: "Error fetching attendance data" });
+  }
+});
+
+app.post("/api/atten", async (req, res) => {
+  const { sub,teacher, paper,date,student } = req.body;
+
+  try {
+
+    const newAtten = new Atten({
+      sub,
+      teacher,
+      paper,
+      date,
+      student
+      
+    });
+
+    await newAtten.save();
+    res
+      .status(201)
+      .json({ message: "Add the attendence" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error in attendence" });
+  }
+});
+
+app.delete("/api/atten/:id",async(req,res)=>{
+  try
+  {await connectDb(process.env.MONGODB_URL)
+  let show=await Atten.deleteOne({_id: new mongoose.mongo.ObjectId(req.params.id)})
+  res.send(show)}
+ catch(error){
+  console.log(error)
+ }
+});
+
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
