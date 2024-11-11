@@ -472,7 +472,7 @@ const attendance = new mongoose.Schema({
   paper:String,
   date:String,
   student:String,
-
+  lock:{ type: Boolean, default: false },
  // Changed to Boolean
 });
 
@@ -490,7 +490,7 @@ app.get('/api/atten', async (req, res) => {
 });
 
 app.post("/api/atten", async (req, res) => {
-  const { sub,teacher, paper,date,student } = req.body;
+  const { sub,teacher, paper,date,student,lock } = req.body;
 
   try {
 
@@ -499,7 +499,8 @@ app.post("/api/atten", async (req, res) => {
       teacher,
       paper,
       date,
-      student
+      student,
+      lock
       
     });
 
