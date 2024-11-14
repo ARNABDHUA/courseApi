@@ -269,6 +269,10 @@ const studentSchema = new mongoose.Schema({
   password: String,
   phonenumber: Number,
   guardian:String,
+  course:String,
+  starting:String,
+  end:String,
+  roll:String,
   status:{ type: Boolean, default: true },
   bca: { type: Boolean, default: false },
   mca: { type: Boolean, default: false },
@@ -346,21 +350,65 @@ app.post('/api/signin-student', async (req, res) => {
 });
 
 // Endpoint to edit a student
+// app.put("/api/student/:email", async (req, res) => {
+//   const { email } = req.params;
+//   const updatedData = req.body;
+
+//   try {
+//     const student = await Student.findOneAndUpdate({ email }, updatedData,{ new: true });
+//     if (!student) {
+//       return res.status(404).json({ message: "Student not found" });
+//     }
+//     res.status(200).json({ message: "Student updated successfully", student });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Error updating student" });
+//   }
+// });
+
+const generateRollNumber = async (joiningYear, streamCodes) => {
+  const sumStreamCodes = streamCodes.reduce((sum, code) => sum + parseInt(code, 10), 0);
+  const sumStr = sumStreamCodes.toString().padStart(2, "0").slice(-2); // Take the last two digits of the sum
+
+  const count = (await Student.countDocuments({})) + 1;
+  const countStr = count.toString().padStart(4, "0");
+  return `${joiningYear}${sumStr}${countStr}`;
+};
+
 app.put("/api/student/:email", async (req, res) => {
   const { email } = req.params;
-  const updatedData = req.body;
+  const updatedData = { ...req.body }; // Copy req.body to updatedData
 
   try {
-    const student = await Student.findOneAndUpdate({ email }, updatedData,{ new: true });
+    // Check if the student exists
+    let student = await Student.findOne({ email });
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }
+
+    // Check if course needs to be added
+    if (!student.course && updatedData.course) {
+      // Add `course` to updatedData if it's provided and doesn't exist in the student's record
+      student.course = updatedData.course;
+    }
+
+    // Generate and add roll number if `course` exists and `roll` is missing
+    if (student.course && !student.roll) {
+      const selectedStreamCodes = [student.course]; // Using the course code
+      updatedData.roll = await generateRollNumber("3024", selectedStreamCodes);
+    }
+
+    // Update the student's information with the new roll and course, if applicable
+    student = await Student.findOneAndUpdate({ email }, updatedData, { new: true });
     res.status(200).json({ message: "Student updated successfully", student });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error updating student" });
   }
 });
+
+
 
 // Endpoint to delete a student
 app.delete("/api/student/:email", async (req, res) => {
