@@ -394,7 +394,18 @@ app.put("/api/student/:email", async (req, res) => {
 
     // Generate and add roll number if `course` exists and `roll` is missing
     if (student.course && !student.roll) {
-      const selectedStreamCodes = [student.course]; // Using the course code
+      const streamCodeMap = {
+        BCA: "22",
+        MCA: "12",
+        MBA: "13",
+        BTech: "15",
+        BA: "14",
+        MTech: "24",
+      };
+
+      // Map selected streams to their respective codes
+      const selectedStreamCodes = [(streamCodeMap[student.course] || "00")];
+
       updatedData.roll = await generateRollNumber("3024", selectedStreamCodes);
     }
 
