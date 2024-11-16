@@ -405,7 +405,8 @@ const generateRollNumber = async (joiningYear, streamCodes) => {
   const sumStreamCodes = streamCodes.reduce((sum, code) => sum + parseInt(code, 10), 0);
   const sumStr = sumStreamCodes.toString().padStart(2, "0").slice(-2); // Take the last two digits of the sum
 
-  const count = (await Student.countDocuments({})) + 1;
+  const rollPrefix = `${joiningYear}${sumStr}` //change
+  const count = (await Student.countDocuments({ roll: { $regex: `^${rollPrefix}` } })) + 1;//change
   const countStr = count.toString().padStart(4, "0");
   return `${joiningYear}${sumStr}${countStr}`;
 };
