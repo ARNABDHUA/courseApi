@@ -188,6 +188,41 @@ app.post('/api/signin-teacher', async (req, res) => {
   }
 });
 
+app.post("/api/reset-password", async (req, res) => {
+  const { registerNumber, oldPassword, newPassword } = req.body;
+
+  try {
+    // Validate request fields
+    if (!registerNumber || !oldPassword || !newPassword) {
+      return res.status(400).json({ success: false, message: "All fields are required." });
+    }
+
+    // Find teacher by registerNumber
+    const teacher = await Teacher.findOne({ registerNumber });
+    if (!teacher) {
+      return res.status(404).json({ success: false, message: "Teacher not found." });
+    }
+
+    // Compare old password
+    const isMatch = await bcrypt.compare(oldPassword, teacher.password);
+    if (!isMatch) {
+      return res.status(400).json({ success: false, message: "Old password is incorrect." });
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update password in the database
+    teacher.password = hashedPassword;
+    await teacher.save();
+
+    return res.status(200).json({ success: true, message: "Password reset successful." });
+  } catch (error) {
+    console.error("Error resetting password:", error);
+    return res.status(500).json({ success: false, message: "Internal server error." });
+  }
+});
+
 // Endpoint to fetch teacher data by registration number
 app.get("/api/teacher/:registerNumber", async (req, res) => {
   const { registerNumber } = req.params;
