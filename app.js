@@ -630,6 +630,7 @@ const result = new mongoose.Schema({
   sub:String,
   examno: String,
   roll:String,
+  score:Number,
   status:{ type: Boolean, default: false },
  // Changed to Boolean
 });
@@ -647,7 +648,7 @@ app.get('/api/result', async (req, res) => {
 });
 
 app.post("/api/result", async (req, res) => {
-  const { student,teacher, paper,sub,examno,roll } = req.body;
+  const { student,teacher, paper,sub,examno,roll,score } = req.body;
 
   try {
 
@@ -657,7 +658,8 @@ app.post("/api/result", async (req, res) => {
       paper,
       sub,
       examno,
-      roll
+      roll,
+      score
       
     });
 
