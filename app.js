@@ -621,6 +621,56 @@ app.delete("/api/atten/:id",async(req,res)=>{
  }
 });
 
+//result
+
+const result = new mongoose.Schema({
+  student :String,
+  teacher:String,
+  paper:String,
+  sub:String,
+  examno: String,
+  roll:String,
+  status:{ type: Boolean, default: false },
+ // Changed to Boolean
+});
+const Result = mongoose.model("Result", result);
+
+// Ensure you have this endpoint in your Express server
+app.get('/api/result', async (req, res) => {
+  try {
+    const result = await Result.find(req.query);
+    res.status(200).json({ result });
+  } catch (error) {
+    console.error("Error fetching attendence check the data", error);
+    res.status(500).json({ message: "Error fetching attendance data" });
+  }
+});
+
+app.post("/api/result", async (req, res) => {
+  const { student,teacher, paper,sub,examno,roll } = req.body;
+
+  try {
+
+    const newResult = new Result({
+      student,
+      teacher,
+      paper,
+      sub,
+      examno,
+      roll
+      
+    });
+
+    await newResult.save();
+    res
+      .status(201)
+      .json({ message: "Add the attendence" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error in attendence" });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
