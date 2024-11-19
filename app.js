@@ -437,6 +437,7 @@ app.put("/api/student/:email", async (req, res) => {
         BTech: "15",
         BA: "14",
         MTech: "24",
+        JECA :"21"
       };
 
       // Map selected streams to their respective codes
