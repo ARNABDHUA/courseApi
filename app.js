@@ -316,7 +316,7 @@ const studentSchema = new mongoose.Schema({
   bba: { type: Boolean, default: false },
   mba: { type: Boolean, default: false },
   jeemain:{ type: Boolean, default: false },
-  wbjeca:{ type: Boolean, default: false },
+  jeca:{ type: Boolean, default: false },
   wbjee:{ type: Boolean, default: false }, 
   gate:{ type: Boolean, default: false },
   ipmat:{ type: Boolean, default: false },
@@ -435,7 +435,7 @@ app.put("/api/student/:email", async (req, res) => {
         MCA: "12",
         MBA: "13",
         BTech: "15",
-        BA: "14",
+        BBA: "14",
         MTech: "24",
         JECA :"21"
       };
