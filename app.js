@@ -308,6 +308,8 @@ const studentSchema = new mongoose.Schema({
   starting:String,
   end:String,
   roll:String,
+  eroll:String,
+  ecourse:String,
   status:{ type: Boolean, default: true },
   bca: { type: Boolean, default: false },
   mca: { type: Boolean, default: false },
@@ -400,6 +402,61 @@ app.post('/api/signin-student', async (req, res) => {
 //     res.status(500).json({ message: "Error updating student" });
 //   }
 // });
+
+const generateERollNumber = async (joiningYear, streamCodes) => {
+  const sumStreamCodes = streamCodes.reduce((sum, code) => sum + parseInt(code, 10), 0);
+  const sumStr = sumStreamCodes.toString().padStart(2, "0").slice(-2); // Take the last two digits of the sum
+
+  const rollPrefix = `${joiningYear}${sumStr}` //change
+  const count = (await Student.countDocuments({ roll: { $regex: `^${rollPrefix}` } })) + 1;//change
+  const countStr = count.toString().padStart(4, "0");
+  return `${joiningYear}${sumStr}${countStr}`;
+};
+
+
+app.put("/api/studentseroll/:email", async (req, res) => {
+  const { email } = req.params;
+  const updatedData = { ...req.body }; // Copy req.body to updatedData
+
+  try {
+    // Check if the student exists
+    let student = await Student.findOne({ email });
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    // Check if ecourse needs to be added
+    if (!student.ecourse && updatedData.ecourse) {
+      // Add `ecourse` to updatedData if it's provided and doesn't exist in the student's record
+      student.ecourse = updatedData.ecourse;
+    }
+
+    // Generate and add roll number if `ecourse` exists and `eroll` is missing
+    if (student.ecourse && !student.eroll) {
+      const streamCodeMap = {
+       WBJEE:"22",
+        JECA :"21",
+        JEEMAIN:"31",
+        GATE:"50",
+        IPMAT:"55",
+        CAT:"66",
+      };
+
+      // Map selected streams to their respective codes
+      const selectedStreamCodes = [(streamCodeMap[student.ecourse] || "00")];
+
+      updatedData.eroll = await generateERollNumber("Ex1121", selectedStreamCodes);
+    }
+
+    // Update the student's information with the new roll and course, if applicable
+    student = await Student.findOneAndUpdate({ email }, updatedData, { new: true });
+    res.status(200).json({ message: "Student updated successfully", student });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error updating student" });
+  }
+});
 
 const generateRollNumber = async (joiningYear, streamCodes) => {
   const sumStreamCodes = streamCodes.reduce((sum, code) => sum + parseInt(code, 10), 0);
