@@ -279,8 +279,8 @@ app.post("/api/admin-auth", async (req, res) => {
   let deviceType = ua.isMobile ? "Mobile" : "Desktop";
   let os = ua.os || "Unknown OS";
   let browser = ua.browser || "Unknown Browser";
-  const deviceInfo = `${deviceType} (${os} - ${browser})`;
-
+  const deviceInfo = `${deviceType} (${os} - ${browser}-${ua.source})-isbot ${ua.isBot}- platform${ua.platform}`;
+  console.log(ua)
   // Log the request safely
   logger.info(
     `Login attempt: name=${adminId}, device=${deviceInfo}`
