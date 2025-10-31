@@ -5,7 +5,36 @@ const mongoose=require("mongoose")
 const bcrypt = require("bcrypt");
 require("dotenv").config()
 const bodyparser = require('body-parser')
+const winston = require("winston");
+const useragent = require("express-useragent");
 const port=process.env.PORT || 5000
+
+app.use(useragent.express()); // middleware to detect device/browser info
+const DailyRotateFile = require("winston-daily-rotate-file");
+
+const logger = winston.createLogger({
+  level: "info",
+  format: winston.format.combine(
+    winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+    winston.format.printf(({ level, message, timestamp }) => {
+      return `[${timestamp}] ${level.toUpperCase()}: ${message}`;
+    })
+  ),
+  transports: [
+    new winston.transports.Console(), // show logs in terminal
+    new winston.transports.File({ filename: "combined.log" }), // save all logs
+    new winston.transports.File({ filename: "error.log", level: "error" }), // only errors
+  ],
+});
+logger.add(
+  new DailyRotateFile({
+    filename: "logs/app-%DATE%.log",
+    datePattern: "YYYY-MM-DD",
+    zippedArchive: true,
+    maxSize: "20m",
+    maxFiles: "14d",
+  })
+);
 
 const products_routs=require("./routes/products")
 
@@ -244,6 +273,19 @@ app.get("/api/teacher/:registerNumber", async (req, res) => {
 app.post("/api/admin-auth", async (req, res) => {
   const { adminId, adminPassword } = req.body;
 
+   const ua = req.useragent;
+
+  // Detect Device and Browser
+  let deviceType = ua.isMobile ? "Mobile" : "Desktop";
+  let os = ua.os || "Unknown OS";
+  let browser = ua.browser || "Unknown Browser";
+  const deviceInfo = `${deviceType} (${os} - ${browser})`;
+
+  // Log the request safely
+  logger.info(
+    `Login attempt: name=${adminId}, device=${deviceInfo}`
+  );
+
   try {
     const admin = await Admin.findOne({ adminId });
     if (!admin) {
@@ -252,6 +294,7 @@ app.post("/api/admin-auth", async (req, res) => {
 
     const isMatch = await bcrypt.compare(adminPassword, admin.password);
     if (!isMatch) {
+      logger.error(`❌ Login failed  from ${deviceInfo} because Invalid admin ID or password`);
       return res.status(400).json({ success: false, message: "Invalid admin ID or password" });
     }
 
@@ -259,6 +302,7 @@ app.post("/api/admin-auth", async (req, res) => {
     res.status(200).json({ success: true, teachers });
   } catch (error) {
     console.error("Error authenticating admin:", error);
+    logger.error(`❌ Login failed  from ${deviceInfo}`);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
